@@ -36,11 +36,18 @@ def test_issue_reader_node_maps_api_response(mock_source, mock_rule, mock_issues
     assert issue["severity"] == "MAJOR"
     assert issue["line_start"] == 10
     assert "PENDING" in issue["code_snippet"]
+    assert issue["file_path"] == "src/main/java/PaymentService.java"
+    assert issue["rule_description"] == "String literals should not be duplicated"
+    assert issue["remediation_guidance"] == "5min"
 
 
 @patch("agents.issue_reader.tools.SonarQubeClient.get_issues")
-def test_issue_reader_returns_empty_when_no_issues(mock_issues):
+@patch("agents.issue_reader.tools.SonarQubeClient.get_rule")
+@patch("agents.issue_reader.tools.SonarQubeClient.get_source")
+def test_issue_reader_returns_empty_when_no_issues(mock_source, mock_rule, mock_issues):
     mock_issues.return_value = []
     state = make_state()
     result = issue_reader_node(state)
     assert result["issues"] == []
+    mock_rule.assert_not_called()
+    mock_source.assert_not_called()

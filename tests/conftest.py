@@ -1,6 +1,7 @@
 # tests/conftest.py
 import os
 from typing import Dict, Any
+import pytest
 
 # Set required env vars before any config.py import occurs
 os.environ.setdefault("SONAR_URL", "http://localhost:9000")
@@ -12,6 +13,15 @@ os.environ.setdefault("REPO_LOCAL_PATH", "/tmp/test-repo")
 os.environ.setdefault("LLM_MODEL", "claude-sonnet-4-6")
 
 from state import AgentState
+
+
+@pytest.fixture(autouse=True)
+def reset_sonarqube_client():
+    """Reset SonarQubeClient singleton between tests to prevent state leakage."""
+    import agents.issue_reader.tools as issue_reader_tools
+    issue_reader_tools._client = None
+    yield
+    issue_reader_tools._client = None
 
 
 def make_state(**kwargs) -> AgentState:
