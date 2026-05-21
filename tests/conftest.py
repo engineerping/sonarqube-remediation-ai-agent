@@ -17,11 +17,32 @@ from state import AgentState
 
 @pytest.fixture(autouse=True)
 def reset_sonarqube_client():
-    """Reset SonarQubeClient singleton between tests to prevent state leakage."""
+    """Reset singleton clients between tests to prevent state leakage."""
     import agents.issue_reader.tools as issue_reader_tools
     issue_reader_tools._client = None
+    try:
+        import agents.remediation.tools as remediation_tools
+        remediation_tools._retriever = None
+    except ImportError:
+        pass
+    try:
+        import agents.validation.tools as validation_tools
+        validation_tools._client = None
+    except ImportError:
+        pass
     yield
+    import agents.issue_reader.tools as issue_reader_tools
     issue_reader_tools._client = None
+    try:
+        import agents.remediation.tools as remediation_tools
+        remediation_tools._retriever = None
+    except ImportError:
+        pass
+    try:
+        import agents.validation.tools as validation_tools
+        validation_tools._client = None
+    except ImportError:
+        pass
 
 
 def make_state(**kwargs) -> AgentState:
