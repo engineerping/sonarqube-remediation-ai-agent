@@ -71,4 +71,4 @@ def issue_reader_node(state: AgentState) -> dict:
         "rule_cache": {},
         "issues": [],
     })
-    return {"issues": result["issues"]}
+    return {"issues": result["issues"], "issues_fetched": True}

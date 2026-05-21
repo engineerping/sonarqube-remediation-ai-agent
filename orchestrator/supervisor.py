@@ -7,11 +7,13 @@ from agents.remediation.agent import remediation_node
 from agents.validation.agent import validation_node
 from agents.github.agent import github_node
 
-Route = Literal["issue_reader", "remediator", "validator", "github_agent"]
+Route = Literal["issue_reader", "remediator", "validator", "github_agent", "__end__"]
 
 
 def route(state: AgentState) -> Route:
     if not state["issues"]:
+        if state.get("issues_fetched"):
+            return END
         return "issue_reader"
     if not state["fixes"]:
         return "remediator"
@@ -44,6 +46,7 @@ def build_supervisor(checkpointer=None):
             "remediator": "remediator",
             "validator": "validator",
             "github_agent": "github_agent",
+            END: END,
         },
     )
     builder.add_edge("issue_reader", "router")

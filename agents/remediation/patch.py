@@ -59,7 +59,7 @@ def apply_patch(file_content: str, line_start: int, line_end: int,
 
 
 def create_unified_diff(original_content: str, new_content: str,
-                        file_path: str, line_start: int, line_end: int) -> str:
+                        file_path: str) -> str:
     diff = difflib.unified_diff(
         original_content.splitlines(keepends=True),
         new_content.splitlines(keepends=True),

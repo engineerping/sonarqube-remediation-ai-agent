@@ -25,6 +25,9 @@ def rag_retrieve_node(state: RemediationState) -> dict:
 
 def llm_fix_node(state: RemediationState) -> dict:
     fixes: List[Fix] = []
+    # Known limitation: when multiple issues share the same file, line numbers from the
+    # second issue onward may be stale if the first patch changed line count. Each fix
+    # processes fresh file content but uses the original SonarQube line numbers.
     for issue in state["issues_to_fix"]:
         fixed_snippet = tools.call_llm(
             rule_id=issue["rule_id"],
@@ -44,8 +47,7 @@ def llm_fix_node(state: RemediationState) -> dict:
             fixed_block=fixed_snippet,
         )
         diff = create_unified_diff(
-            file_content, new_content, issue["file_path"],
-            issue["line_start"], issue["line_end"]
+            file_content, new_content, issue["file_path"]
         )
         tools.write_file(issue["file_path"], new_content)
         fixes.append(Fix(

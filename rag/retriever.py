@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS sonar_rules (
     description TEXT,
     remediation TEXT,
     severity    VARCHAR(20),
-    embedding   vector(1536)
+    embedding   vector({dim})
 );
 
 CREATE INDEX IF NOT EXISTS sonar_rules_embedding_idx
@@ -32,6 +32,9 @@ class RAGRetriever:
         self.embedder = EmbeddingModel()
         self._ensure_table()
 
+    def _create_table_sql(self) -> str:
+        return CREATE_TABLE_SQL.format(dim=self.embedder.dimension)
+
     def _conn(self):
         conn = psycopg2.connect(self.dsn)
         register_vector(conn)
@@ -40,7 +43,7 @@ class RAGRetriever:
     def _ensure_table(self):
         with self._conn() as conn:
             with conn.cursor() as cur:
-                cur.execute(CREATE_TABLE_SQL)
+                cur.execute(self._create_table_sql())
             conn.commit()
 
     def upsert(self, rule_key: str, name: str, description: str,

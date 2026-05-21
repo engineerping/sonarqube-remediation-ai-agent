@@ -1,5 +1,6 @@
 # state.py
 from typing import TypedDict, List, Optional, Annotated
+import operator
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 
@@ -35,7 +36,8 @@ class AgentState(TypedDict):
     project_key: str
     branch: str
     issues: List[Issue]
-    fixes: List[Fix]
+    issues_fetched: bool
+    fixes: Annotated[List[Fix], operator.add]
     validation_result: Optional[ValidationResult]
     round_number: int
     max_rounds: int

@@ -50,6 +50,7 @@ def make_state(**kwargs) -> AgentState:
         "project_key": "test:project",
         "branch": "main",
         "issues": [],
+        "issues_fetched": False,
         "fixes": [],
         "validation_result": None,
         "round_number": 0,

@@ -66,7 +66,8 @@ class SonarQubeClient:
             timeout=300,
         )
         if result.returncode != 0:
-            raise RuntimeError(f"sonar-scanner failed:\n{result.stderr}")
+            safe_stderr = result.stderr.replace(self.token, "***")
+            raise RuntimeError(f"sonar-scanner failed:\n{safe_stderr}")
         for line in result.stdout.splitlines():
             if "task?id=" in line:
                 return line.split("task?id=")[-1].strip()

@@ -73,7 +73,7 @@ def test_apply_patch_replaces_lines():
 def test_create_unified_diff_produces_diff():
     original = "public class Foo {\n    String x = \"dup\";\n}"
     fixed_block = "public class Foo {\n    private static final String DUP = \"dup\";\n    String x = DUP;\n}"
-    diff = create_unified_diff(original, fixed_block, "Foo.java", line_start=1, line_end=3)
+    diff = create_unified_diff(original, fixed_block, "Foo.java")
     assert "---" in diff
     assert "+++" in diff
     assert "-    String x" in diff
