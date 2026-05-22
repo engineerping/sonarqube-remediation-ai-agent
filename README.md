@@ -1,21 +1,35 @@
-<div align="right">
+# Dual License Notice
+
+This project is licensed under two distinct licenses:
+
+1. **Personal / Non-Commercial Use**
+   Free for personal, non-commercial purposes under the **MIT License**.
+
+2. **Commercial Use**
+   Requires a **paid commercial license**.
+   See [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md) for details.
+
+<div align="center">
+
 # Sonarqube-remediation-ai-agent
 
-<img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
-<img src="https://img.shields.io/badge/LangGraph-Supervisor-FF6B35?style=flat-square" alt="LangGraph">
-<img src="https://img.shields.io/badge/LiteLLM-Unified%20LLM-7C3AED?style=flat-square" alt="LiteLLM">
-<img src="https://img.shields.io/badge/pgvector-RAG-16A34A?style=flat-square&logo=postgresql&logoColor=white" alt="pgvector">
-<img src="https://img.shields.io/badge/SonarQube-REST%20API-CB7A04?style=flat-square" alt="SonarQube">
-<img src="https://img.shields.io/badge/GitHub-PyGithub-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub">
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Supervisor-FF6B35?logo=langgraph&logoColor=white)](https://langchain-ai.github.io/langgraph/)
+[![LiteLLM](https://img.shields.io/badge/LiteLLM-Unified%20LLM-7C3AED?logo=lightning&logoColor=white)](https://www.litellm.ai/)
+[![pgvector](https://img.shields.io/badge/pgvector-RAG-16A34A?logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
+[![SonarQube](https://img.shields.io/badge/SonarQube-REST%20API-CB7A04?logo=sonarqube&logoColor=white)](https://www.sonarsource.com/products/sonarqube/)
+[![GitHub](https://img.shields.io/badge/GitHub-PyGithub-181717?logo=github&logoColor=white)](https://github.com/)
 
 [English](README_en.md) · 简体中文
-</div>
 
-<p align="left">
-> 基于 <strong>LangGraph Supervisor</strong> 模式的 AI 自动代码修复代理。<br>
-自动读取 SonarQube 检测到的 Java 代码问题，通过 LLM + RAG 生成精准修复补丁，<br>
-验证修复结果后，自动在 GitHub 上创建 Pull Request。支持断点续跑。
-</p>
+---
+
+> 基于 **LangGraph Supervisor** 模式的 AI 自动代码修复代理。
+> 自动读取 SonarQube 检测到的 Java 代码问题，通过 LLM + RAG 生成精准修复补丁，
+> 验证修复结果后，自动在 GitHub 上创建 Pull Request。
+> 支持断点续跑。
+
+</div>
 
 ---
 
