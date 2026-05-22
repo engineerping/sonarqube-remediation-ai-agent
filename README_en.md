@@ -64,46 +64,7 @@ This project is licensed under two distinct licenses:
 
 > Full interactive diagram (draw.io): [docs/architecture-diagram-resume.html](docs/architecture-diagram-resume.html)
 
-```mermaid
-flowchart TD
-    CLI(["🖥️ CLI Trigger\npython main.py run --project &lt;key&gt; --branch main --github-repo org/repo\n--thread-id &lt;uuid&gt;  ← optional, resume a prior run"])
-
-    subgraph SG["⚙️  LangGraph Supervisor Graph  ·  StateGraph · SqliteSaver · resumable · max_rounds retry loop"]
-        direction LR
-        A1["📋 ① IssueReader\nSonarQube REST · Subgraph\n· Fetch open issues\n· Fetch rule metadata\n· Fetch source context\n· Emit Issue[] → state"]
-        A2["🔧 ② Remediator\npgvector · LiteLLM · Subgraph\n· RAG: retrieve rules\n· LiteLLM: generate fix\n· Indent-preserving patch\n· Emit Fix[] → state"]
-        A3["☑️ ③ Validator\nsonar-scanner CLI · Subgraph\n· Apply unified diffs\n· Trigger sonar-scanner\n· Poll CE task status\n· Emit ValidationResult"]
-        A4["🐙 ④ GitHubAgent\nPyGithub · Subgraph\n· Create feature branch\n· Commit patched files\n· Open Pull Request\n· Emit pr_url → state"]
-        A1 --> A2 --> A3 --> A4
-        A3 -- "remaining > 0\n& round < N  ↩ Retry" --> A2
-    end
-
-    RAG[("🗄️ pgvector\nPostgreSQL + pgvector\n600+ Java rules\nOpenAI embed-3-small\ncosine top-k")]
-    LLM[("🤖 LiteLLM\nUnified LLM interface\nClaude / Azure GPT-4o\nvia LLM_MODEL env")]
-    SQLITE[("💾 SQLite\nLangGraph SqliteSaver\nAgentState per step\nruns/agent_runs.db")]
-    SONAR[["🔎 SonarQube Server\non-premise / private cloud\n/api/issues · /api/rules\n/api/sources · /api/ce/task"]]
-    GH[["🐙 GitHub\ntarget repository\nPyGithub API"]]
-
-    CLI --> SG
-    A2 -.-> RAG & LLM
-    SG -. "checkpoint / step" .-> SQLITE
-    A1 & A3 -. "REST API" .-> SONAR
-    A4 -. "push branch + PR" .-> GH
-
-    classDef agent fill:#e0f2f1,stroke:#4db6ac,color:#1a1a1a
-    classDef ragNode fill:#e8f5e9,stroke:#66bb6a,color:#1a1a1a
-    classDef llmNode fill:#ede7f6,stroke:#9575cd,color:#1a1a1a
-    classDef dbNode fill:#fff3e0,stroke:#ffb74d,color:#1a1a1a
-    classDef extNode fill:#fff8f1,stroke:#ffa726,color:#1a1a1a
-    classDef cliNode fill:#e8e8e8,stroke:#bdbdbd,color:#1a1a1a
-
-    class A1,A2,A3,A4 agent
-    class RAG ragNode
-    class LLM llmNode
-    class SQLITE dbNode
-    class SONAR,GH extNode
-    class CLI cliNode
-```
+![Sonarqube-remediation-ai-agent-architecture](Sonarqube-remediation-ai-agent-architecture.png)
 
 ### Dual-Database Design
 
