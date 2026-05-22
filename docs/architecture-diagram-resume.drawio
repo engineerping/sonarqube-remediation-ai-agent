@@ -53,33 +53,33 @@
             <mxPoint y="-1" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="e-sup-reader" edge="1" parent="1" source="supervisor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#546e7a;strokeWidth=2;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.091;exitY=1.016;exitDx=0;exitDy=0;exitPerimeter=0;" target="reader" value="">
+        <mxCell id="e-sup-reader" edge="1" parent="1" source="supervisor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #8197a2);strokeWidth=2;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.091;exitY=1.016;exitDx=0;exitDy=0;exitPerimeter=0;" target="reader" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="154" y="215" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="e-sup-rem" edge="1" parent="1" source="supervisor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#546e7a;strokeWidth=2;entryX=0.25;entryY=0;entryDx=0;entryDy=0;exitX=0.274;exitY=0.984;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
+        <mxCell id="e-sup-rem" edge="1" parent="1" source="supervisor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #8197a2);strokeWidth=2;entryX=0.25;entryY=0;entryDx=0;entryDy=0;exitX=0.274;exitY=0.984;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="319.155" y="210.50400000000002" as="sourcePoint" />
             <mxPoint x="320" y="249" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="e-sup-val" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#546e7a;strokeWidth=2;entryX=0.75;entryY=0;entryDx=0;entryDy=0;exitX=0.672;exitY=0.96;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
+        <mxCell id="e-sup-val" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #8197a2);strokeWidth=2;entryX=0.75;entryY=0;entryDx=0;entryDy=0;exitX=0.672;exitY=0.96;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="703.848" y="208.51999999999998" as="sourcePoint" />
             <mxPoint x="703.5" y="249" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="e-sup-gh" edge="1" parent="1" source="supervisor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#546e7a;strokeWidth=2;exitX=0.871;exitY=0.992;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitPerimeter=0;" target="github-agent" value="">
+        <mxCell id="e-sup-gh" edge="1" parent="1" source="supervisor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #8197a2);strokeWidth=2;exitX=0.871;exitY=0.992;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitPerimeter=0;" target="github-agent" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-a1-a2" edge="1" parent="1" source="reader" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#546e7a;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="remediator" value="">
+        <mxCell id="e-a1-a2" edge="1" parent="1" source="reader" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #8197a2);strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="remediator" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-a2-a3" edge="1" parent="1" source="remediator" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#546e7a;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="validator" value="">
+        <mxCell id="e-a2-a3" edge="1" parent="1" source="remediator" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #8197a2);strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="validator" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-a3-a4" edge="1" parent="1" source="validator" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#546e7a;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="github-agent" value="">
+        <mxCell id="e-a3-a4" edge="1" parent="1" source="validator" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #8197a2);strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="github-agent" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e-retry" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=light-dark(#ff0000, #934a4a);strokeWidth=4;dashed=1;fontSize=16;fontColor=light-dark(#ff0000, #934a4a);fontStyle=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;labelBackgroundColor=light-dark(#00ff11, #ededed);" value="     Remaining &gt; 0   &amp;&amp;   Round &lt; N  ↩ Retry     ">
@@ -95,7 +95,7 @@
             <mxPoint x="289" y="288.75" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="e-rem-rag" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#90a4ae;strokeWidth=2;endArrow=open;endFill=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="rag" value="">
+        <mxCell id="e-rem-rag" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #55666e);strokeWidth=2;endArrow=open;endFill=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="rag" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="339" y="425" />
@@ -105,7 +105,7 @@
             <mxPoint x="233" y="437" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="e-rem-llm" edge="1" parent="1" source="remediator" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#90a4ae;strokeWidth=2;endArrow=open;endFill=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" target="litellm" value="">
+        <mxCell id="e-rem-llm" edge="1" parent="1" source="remediator" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #55666e);strokeWidth=2;endArrow=open;endFill=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" target="litellm" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="339" y="408" />
@@ -116,20 +116,20 @@
             <mxPoint x="457" y="444" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="e-sup-sqlite" edge="1" parent="1" source="supervisor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#ffb74d;strokeWidth=3;endArrow=open;endFill=0;fontSize=15;entryX=0.913;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.988;exitY=0.984;exitDx=0;exitDy=0;exitPerimeter=0;labelBackgroundColor=light-dark(#01f9e8, #ededed);fontColor=light-dark(#fa0000, #ededed);fontStyle=1" value=" checkpoint">
-          <mxGeometry relative="1" x="0.7881" y="-19" as="geometry">
-            <mxPoint y="-1" as="offset" />
-            <mxPoint x="969.0250000000001" y="215.01600000000008" as="sourcePoint" />
-            <mxPoint x="969.1199999999999" y="452" as="targetPoint" />
+        <mxCell id="e-sup-sqlite" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#00ff2a, #814300);strokeWidth=3;endArrow=open;endFill=0;fontSize=15;entryX=0.913;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.988;exitY=0.984;exitDx=0;exitDy=0;exitPerimeter=0;labelBackgroundColor=light-dark(#01f9e8, #ededed);fontColor=light-dark(#fa0000, #ededed);fontStyle=1" value=" checkpoint">
+          <mxGeometry relative="1" x="0.7805" y="-19" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="969.0920000000001" y="208.00800000000004" as="sourcePoint" />
+            <mxPoint x="969.1199999999999" y="454" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="e-reader-sonar" edge="1" parent="1" source="reader" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#90a4ae;strokeWidth=2;endArrow=open;endFill=0;exitX=0.141;exitY=1.003;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
+        <mxCell id="e-reader-sonar" edge="1" parent="1" source="reader" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #55666e);strokeWidth=2;endArrow=open;endFill=0;exitX=0.141;exitY=1.003;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="85" y="398" as="sourcePoint" />
-            <mxPoint x="85" y="570" as="targetPoint" />
+            <mxPoint x="85" y="577" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="e-val-sonar" edge="1" parent="1" source="validator" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#90a4ae;strokeWidth=2;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.807;entryY=-0.006;entryDx=0;entryDy=0;entryPerimeter=0;" target="sonar" value="">
+        <mxCell id="e-val-sonar" edge="1" parent="1" source="validator" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #55666e);strokeWidth=2;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.807;entryY=-0.006;entryDx=0;entryDy=0;entryPerimeter=0;" target="sonar" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="634" y="554" />
@@ -141,7 +141,7 @@
         <mxCell id="r89WEBbX8JHI1xpW9uaq-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=none;strokeColor=light-dark(#ff0000, #ededed);" value="" vertex="1">
           <mxGeometry height="23.5" width="349" x="335" y="217" as="geometry" />
         </mxCell>
-        <mxCell id="e-ghagent-gh" edge="1" parent="1" source="github-agent" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#90a4ae;strokeWidth=2;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.394;entryY=0.021;entryDx=0;entryDy=0;entryPerimeter=0;" target="gh" value="">
+        <mxCell id="e-ghagent-gh" edge="1" parent="1" source="github-agent" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=light-dark(#000000, #55666e);strokeWidth=2;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.394;entryY=0.021;entryDx=0;entryDy=0;entryPerimeter=0;" target="gh" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="862" y="433" />
