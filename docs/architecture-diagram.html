@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SonarQube AI Auto-Fix Agent — Architecture</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #ffffff;
+  padding: 40px 44px;
+  color: #111827;
+}
+
+.diagram { max-width: 900px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+.stack-badges { text-align: center; margin-bottom: 28px; }
+
+/* ── CLI TRIGGER ── */
+.trigger-label {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+.cli-code {
+  display: block;
+  text-align: center;
+  background: #f8fafc;
+  border: 1.5px solid #94a3b8;
+  border-radius: 8px;
+  padding: 9px 24px;
+  font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace;
+  font-size: 12.5px;
+  color: #1e293b;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+/* ── ARROWS ── */
+.arrow-down {
+  text-align: center;
+  font-size: 18px;
+  color: #94a3b8;
+  line-height: 1;
+  margin: 8px 0;
+}
+.arrow-down-label {
+  font-size: 9.5px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* ── SUPERVISOR BOX ── */
+.supervisor {
+  border: 2.5px solid #2563eb;
+  border-radius: 14px;
+  background: #f0f7ff;
+  padding: 18px 18px 16px;
+}
+.supervisor-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.supervisor-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1d4ed8;
+}
+.supervisor-sub {
+  font-size: 10.5px;
+  color: #60a5fa;
+}
+
+/* ── ROUTER ── */
+.router {
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 10.5px;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  color: #1e3a8a;
+  line-height: 1.8;
+}
+.router-title {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  color: #1d4ed8;
+  margin-bottom: 3px;
+}
+
+/* ── AGENTS GRID ── */
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.agent {
+  background: #ffffff;
+  border: 1.5px solid #93c5fd;
+  border-radius: 10px;
+  padding: 12px;
+  position: relative;
+}
+.agent-num {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  font-size: 15px;
+  opacity: 0.25;
+  font-weight: 700;
+  color: #2563eb;
+  line-height: 1;
+}
+.agent-icon { font-size: 22px; margin-bottom: 6px; }
+.agent-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e40af;
+  margin-bottom: 7px;
+}
+.agent-steps {
+  list-style: none;
+  font-size: 10px;
+  color: #6b7280;
+  line-height: 1.75;
+}
+.agent-steps li::before { content: '→ '; color: #93c5fd; font-weight: 600; }
+.agent-tags { margin-top: 9px; display: flex; flex-wrap: wrap; gap: 3px; }
+
+/* ── FLOW INDICATOR ── */
+.flow-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  font-size: 9.5px;
+  color: #60a5fa;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  margin-top: 2px;
+  padding: 0 4px;
+}
+.flow-step { flex: 1; text-align: center; font-weight: 600; color: #3b82f6; }
+.flow-sep { color: #bfdbfe; font-size: 14px; }
+.flow-loop {
+  width: 100%;
+  text-align: center;
+  margin-top: 4px;
+  font-size: 9.5px;
+  color: #f59e0b;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+}
+
+/* ── INFRA ROW ── */
+.infra-label {
+  text-align: center;
+  font-size: 9.5px;
+  color: #9ca3af;
+  font-style: italic;
+  margin: 8px 0 12px;
+  letter-spacing: 0.2px;
+}
+.infra-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.infra-box {
+  border-radius: 10px;
+  padding: 13px 14px;
+  border: 1.5px solid;
+}
+.infra-box.rag   { background: #f0fdf4; border-color: #16a34a; }
+.infra-box.llm   { background: #faf5ff; border-color: #9333ea; }
+.infra-box.store { background: #fefce8; border-color: #ca8a04; }
+.infra-title {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.rag   .infra-title { color: #166534; }
+.llm   .infra-title { color: #7e22ce; }
+.store .infra-title { color: #92400e; }
+.infra-detail {
+  font-size: 10.5px;
+  color: #6b7280;
+  line-height: 1.65;
+}
+.infra-tags { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 3px; }
+
+/* ── EXTERNAL SERVICES ── */
+.ext-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.ext-box {
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1.5px dashed;
+}
+.ext-box.sonar  { background: #fff7ed; border-color: #f97316; }
+.ext-box.github { background: #f8fafc; border-color: #475569; }
+.ext-inner { display: flex; gap: 12px; }
+.ext-icon { font-size: 24px; padding-top: 2px; }
+.ext-title {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.sonar  .ext-title { color: #c2410c; }
+.github .ext-title { color: #1e293b; }
+.ext-detail {
+  font-size: 10.5px;
+  color: #6b7280;
+  line-height: 1.65;
+}
+.ext-tags { margin-top: 7px; display: flex; flex-wrap: wrap; gap: 3px; }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-block;
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin: 2px;
+}
+.b-blue   { background: #dbeafe; color: #1d4ed8; }
+.b-green  { background: #dcfce7; color: #166534; }
+.b-purple { background: #ede9fe; color: #6d28d9; }
+.b-orange { background: #ffedd5; color: #c2410c; }
+.b-gray   { background: #f1f5f9; color: #475569; }
+.b-yellow { background: #fef9c3; color: #854d0e; }
+.b-amber  { background: #fef3c7; color: #92400e; }
+
+/* ── LEGEND ── */
+.legend {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: #9ca3af;
+}
+.legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+<div class="diagram">
+
+  <!-- TITLE -->
+  <div class="title">SonarQube AI Auto-Fix Agent</div>
+  <div class="stack-badges">
+    <span class="badge b-blue">Python 3.14</span>
+    <span class="badge b-blue">LangGraph</span>
+    <span class="badge b-blue">Supervisor Pattern</span>
+    <span class="badge b-green">RAG · pgvector</span>
+    <span class="badge b-purple">LiteLLM</span>
+    <span class="badge b-purple">Claude Sonnet</span>
+    <span class="badge b-purple">Azure OpenAI</span>
+    <span class="badge b-orange">SonarQube REST</span>
+    <span class="badge b-gray">PyGithub</span>
+    <span class="badge b-yellow">SQLite Checkpoint</span>
+  </div>
+
+  <!-- CLI TRIGGER -->
+  <div class="trigger-label">Manual Trigger</div>
+  <code class="cli-code">python main.py run --project &lt;key&gt; --branch main --github-repo org/repo [--thread-id &lt;uuid&gt;]</code>
+  <div class="arrow-down">
+    ↓
+    <div class="arrow-down-label">AgentState initialized · SQLite thread created</div>
+  </div>
+
+  <!-- SUPERVISOR -->
+  <div class="supervisor">
+    <div class="supervisor-head">
+      <span class="supervisor-name">⚙️ LangGraph Supervisor Graph</span>
+      <span class="supervisor-sub">StateGraph · SqliteSaver · resumable via --thread-id · max_rounds retry loop</span>
+    </div>
+
+    <!-- ROUTER -->
+    <div class="router">
+      <div class="router-title">Supervisor Router — state-based conditional dispatch</div>
+      issues=[] &amp; !fetched  →  <strong>issue_reader</strong> &nbsp;|&nbsp;
+      issues=[] &amp; fetched   →  <strong>END</strong> (no issues found)<br>
+      fixes=[]                →  <strong>remediator</strong> &nbsp;|&nbsp;
+      validation_result=None  →  <strong>validator</strong><br>
+      remaining_issues &amp; round &lt; max_rounds  →  <strong>remediator</strong> (retry) &nbsp;|&nbsp;
+      resolved or max_rounds reached  →  <strong>github_agent</strong>
+    </div>
+
+    <!-- 4 AGENTS -->
+    <div class="agents-grid">
+
+      <div class="agent">
+        <span class="agent-num">1</span>
+        <div class="agent-icon">📋</div>
+        <div class="agent-title">IssueReader Agent</div>
+        <ul class="agent-steps">
+          <li>Fetch open issues</li>
+          <li>Fetch rule metadata</li>
+          <li>Fetch source context</li>
+          <li>Emit Issue[] → state</li>
+        </ul>
+        <div class="agent-tags">
+          <span class="badge b-orange">SonarQube REST</span>
+          <span class="badge b-blue">Subgraph</span>
+        </div>
+      </div>
+
+      <div class="agent">
+        <span class="agent-num">2</span>
+        <div class="agent-icon">🔧</div>
+        <div class="agent-title">Remediation Agent</div>
+        <ul class="agent-steps">
+          <li>RAG: retrieve rules</li>
+          <li>LiteLLM: generate fix</li>
+          <li>Indent-preserving patch</li>
+          <li>Emit Fix[] → state</li>
+        </ul>
+        <div class="agent-tags">
+          <span class="badge b-green">pgvector</span>
+          <span class="badge b-purple">LiteLLM</span>
+          <span class="badge b-blue">Subgraph</span>
+        </div>
+      </div>
+
+      <div class="agent">
+        <span class="agent-num">3</span>
+        <div class="agent-icon">✅</div>
+        <div class="agent-title">Validation Agent</div>
+        <ul class="agent-steps">
+          <li>Apply unified diffs</li>
+          <li>Trigger sonar-scanner</li>
+          <li>Poll CE task status</li>
+          <li>Emit ValidationResult</li>
+        </ul>
+        <div class="agent-tags">
+          <span class="badge b-orange">sonar-scanner CLI</span>
+          <span class="badge b-blue">Subgraph</span>
+        </div>
+      </div>
+
+      <div class="agent">
+        <span class="agent-num">4</span>
+        <div class="agent-icon">🐙</div>
+        <div class="agent-title">GitHub Agent</div>
+        <ul class="agent-steps">
+          <li>Create feature branch</li>
+          <li>Commit patched files</li>
+          <li>Open Pull Request</li>
+          <li>Emit pr_url → state</li>
+        </ul>
+        <div class="agent-tags">
+          <span class="badge b-gray">PyGithub</span>
+          <span class="badge b-blue">Subgraph</span>
+        </div>
+      </div>
+
+    </div><!-- /agents-grid -->
+
+    <!-- FLOW BAR -->
+    <div class="flow-bar">
+      <span class="flow-step">① IssueReader</span>
+      <span class="flow-sep">──→──</span>
+      <span class="flow-step">② Remediator</span>
+      <span class="flow-sep">──→──</span>
+      <span class="flow-step">③ Validator</span>
+      <span class="flow-sep">──→──</span>
+      <span class="flow-step">④ GitHub</span>
+    </div>
+    <div class="flow-loop">↩ if issues remain after scan: ③ Validator routes back to ② Remediator (up to max_rounds)</div>
+
+  </div><!-- /supervisor -->
+
+  <!-- STATE ANNOTATION -->
+  <div class="infra-label">
+    AgentState (TypedDict) persisted in SQLite at every node transition:
+    &nbsp; issues[] &nbsp;→&nbsp; fixes[] &nbsp;→&nbsp; validation_result &nbsp;→&nbsp; pr_url
+  </div>
+
+  <!-- INFRASTRUCTURE -->
+  <div class="infra-grid">
+
+    <div class="infra-box rag">
+      <div class="infra-title">🗄️ RAG · pgvector</div>
+      <div class="infra-detail">
+        PostgreSQL + pgvector extension<br>
+        600+ SonarQube Java rule docs<br>
+        OpenAI text-embedding-3-small (1536d)<br>
+        or all-MiniLM-L6-v2 local (384d)<br>
+        Cosine similarity top-k retrieval
+      </div>
+      <div class="infra-tags">
+        <span class="badge b-green">pgvector</span>
+        <span class="badge b-green">sentence-transformers</span>
+        <span class="badge b-green">OpenAI Embeddings</span>
+      </div>
+    </div>
+
+    <div class="infra-box llm">
+      <div class="infra-title">🤖 LLM · LiteLLM Abstraction</div>
+      <div class="infra-detail">
+        Unified model interface layer<br>
+        Demo: claude-sonnet-4-6 (Anthropic)<br>
+        Prod: Azure OpenAI GPT-4o<br>
+        Switch via LLM_MODEL env var<br>
+        Zero code changes for migration
+      </div>
+      <div class="infra-tags">
+        <span class="badge b-purple">LiteLLM</span>
+        <span class="badge b-purple">Claude Sonnet</span>
+        <span class="badge b-purple">Azure OpenAI</span>
+      </div>
+    </div>
+
+    <div class="infra-box store">
+      <div class="infra-title">💾 SQLite · LangGraph Checkpoint</div>
+      <div class="infra-detail">
+        LangGraph SqliteSaver<br>
+        Full AgentState saved per step<br>
+        Resume any run via --thread-id<br>
+        Survives crash / mid-run restart<br>
+        <code style="font-size:9.5px">runs/agent_runs.db</code>
+      </div>
+      <div class="infra-tags">
+        <span class="badge b-yellow">SQLite</span>
+        <span class="badge b-yellow">LangGraph SqliteSaver</span>
+      </div>
+    </div>
+
+  </div><!-- /infra-grid -->
+
+  <!-- EXTERNAL SERVICES -->
+  <div class="ext-row">
+
+    <div class="ext-box sonar">
+      <div class="ext-inner">
+        <div class="ext-icon">🔎</div>
+        <div>
+          <div class="ext-title">SonarQube Server &nbsp;<span style="font-weight:400;font-size:10px;color:#9a3412">(on-premise / private cloud)</span></div>
+          <div class="ext-detail">
+            REST API: /api/issues/search · /api/rules/show · /api/sources/lines<br>
+            /api/ce/task (poll scan status) · /api/qualitygates/project_status<br>
+            CLI: sonar-scanner for re-scan trigger
+          </div>
+          <div class="ext-tags">
+            <span class="badge b-orange">SonarQube Server</span>
+            <span class="badge b-orange">REST API</span>
+            <span class="badge b-orange">sonar-scanner</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ext-box github">
+      <div class="ext-inner">
+        <div class="ext-icon">🐙</div>
+        <div>
+          <div class="ext-title">GitHub &nbsp;<span style="font-weight:400;font-size:10px;color:#64748b">(target repository)</span></div>
+          <div class="ext-detail">
+            Create feature branch · Stage and commit patched Java files<br>
+            Open Pull Request with fix summary table and diff preview<br>
+            Returns PR URL into AgentState for audit trail
+          </div>
+          <div class="ext-tags">
+            <span class="badge b-gray">PyGithub</span>
+            <span class="badge b-gray">GitHub REST API v3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /ext-row -->
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#f0f7ff; border:2.5px solid #2563eb;"></div>
+      LangGraph Supervisor
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#fff; border:1.5px solid #93c5fd;"></div>
+      Agent Subgraph
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#f0fdf4; border:1.5px solid #16a34a;"></div>
+      RAG / Vector Store
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#faf5ff; border:1.5px solid #9333ea;"></div>
+      LLM Provider
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#fefce8; border:1.5px solid #ca8a04;"></div>
+      State Persistence
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#fff7ed; border:1.5px dashed #f97316;"></div>
+      External Service
+    </div>
+  </div>
+
+</div><!-- /diagram -->
+</body>
+</html>

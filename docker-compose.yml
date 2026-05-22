@@ -1,15 +1,33 @@
-version: "3.8"
+# 启动命令：docker compose up -d
+# 停止命令：docker compose down
+# 彻底清除数据：docker compose down -v
+
 services:
   postgres:
+    # pgvector 官方镜像，基于 PostgreSQL 16，内置 vector 扩展
     image: pgvector/pgvector:pg16
     environment:
+      # 数据库连接凭据，与 .env 中 PGVECTOR_DSN 保持一致：
+      # postgresql://sonarrule:sonarrule@localhost:5432/sonarrule_rag
       POSTGRES_USER: sonarrule
       POSTGRES_PASSWORD: sonarrule
       POSTGRES_DB: sonarrule_rag
     ports:
+      # 映射到宿主机 5432，供 Python 应用本地连接
       - "5432:5432"
     volumes:
+      # 持久化数据目录，容器重启后数据不丢失
       - pgdata:/var/lib/postgresql/data
+      # 初始化脚本：容器首次创建时自动执行，启用 pgvector 扩展
+      # 注意：仅在数据卷为空（首次启动）时执行，之后不再重复执行
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      # 健康检查：等待 PostgreSQL 真正就绪后再允许应用连接
+      test: ["CMD-SHELL", "pg_isready -U sonarrule -d sonarrule_rag"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
+  # 命名卷，由 Docker 管理，数据存储在宿主机 Docker 数据目录下
   pgdata:

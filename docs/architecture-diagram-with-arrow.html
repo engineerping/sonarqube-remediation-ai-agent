@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --c-gray:   #e8e8e8;
+  --c-purple: #ede7f6;
+  --c-teal:   #e0f2f1;
+  --c-amber:  #fff3e0;
+  --c-green:  #e8f5e9;
+  --c-slate:  #f1f5f9;
+  --t: #546e7a;
+  --b: #37474f;
+}
+body { font-family: system-ui, -apple-system, sans-serif; background: #fafafa; padding: 24px; }
+.diagram { max-width: 940px; margin: 0 auto; }
+.hint { font-size: 11px; color: #aaa; text-align: center; margin-bottom: 10px; }
+.info-box {
+  background: white; border: 1px solid #e0e0e0; border-radius: 8px;
+  padding: 16px 20px; margin-top: 14px;
+}
+.info-title { font-size: 13px; font-weight: bold; color: #1a1a1a; margin-bottom: 7px; }
+.info-body  { font-size: 11.5px; color: #555; line-height: 1.65; white-space: pre-line; }
+.tag {
+  display: inline-block; font-size: 10px; padding: 2px 8px;
+  border-radius: 10px; margin: 5px 4px 0 0;
+  background: #f5f5f5; color: #777; font-weight: 500;
+}
+/* SVG text classes */
+.th    { fill: #1a1a1a; font-size: 13px; font-weight: bold; }
+.ts    { fill: #555;    font-size: 10px; }
+.th-sm { fill: #1a1a1a; font-size: 11px; font-weight: bold; }
+.ts-sm { fill: #666;    font-size: 9px;  }
+.tag-lbl { font-size: 8.5px; font-weight: bold; }
+/* Colored node fills (shared between rect and text) */
+.c-gray   { fill: var(--c-gray);   stroke: #bdbdbd; }
+.c-purple { fill: var(--c-purple); stroke: #9575cd; }
+.c-teal   { fill: var(--c-teal);   stroke: #4db6ac; }
+.c-amber  { fill: var(--c-amber);  stroke: #ffb74d; }
+.c-green  { fill: var(--c-green);  stroke: #66bb6a; }
+.c-slate  { fill: var(--c-slate);  stroke: #94a3b8; }
+.node { stroke-width: 1.5; cursor: pointer; transition: opacity 0.15s; }
+svg text { stroke: none; }
+.node:hover { opacity: 0.88; }
+</style>
+
+<div class="diagram">
+<p class="hint">Click any component to view details</p>
+
+<svg width="100%" viewBox="0 0 900 496" role="img">
+<title>SonarFix AI — LangGraph Supervisor Architecture</title>
+
+<defs>
+  <!-- primary arrow -->
+  <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke"
+          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+  <!-- thin arrow (infra / ext connections) -->
+  <marker id="ar-thin" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#90a4ae"
+          stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+  <!-- red arrow (retry loop) -->
+  <marker id="ar-red" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#ef9a9a"
+          stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+  <!-- amber arrow (checkpoint) -->
+  <marker id="ar-amber" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#ffb74d"
+          stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- ══════════════════════════════════════════
+     ROW 0 — CLI TRIGGER
+     ══════════════════════════════════════════ -->
+<g class="node c-gray" onclick="show('cli')">
+  <rect x="238" y="12" width="424" height="42" rx="8"/>
+  <text class="th-sm" x="450" y="30" text-anchor="middle">CLI Trigger</text>
+  <text class="ts-sm" x="450" y="46" text-anchor="middle"
+        font-family="'SFMono-Regular',Consolas,monospace">
+    $ python main.py run --project &lt;key&gt;  [--thread-id &lt;uuid&gt;]
+  </text>
+</g>
+
+<!-- Arrow: CLI → Supervisor -->
+<line x1="450" y1="54" x2="450" y2="76"
+      stroke="#546e7a" stroke-width="1.2" marker-end="url(#ar)"/>
+<text x="455" y="68" font-size="8" fill="#aaa" font-style="italic">AgentState init · thread created</text>
+
+<!-- ══════════════════════════════════════════
+     ROW 1 — LANGGRAPH SUPERVISOR
+     ══════════════════════════════════════════ -->
+<g class="node c-purple" onclick="show('supervisor')">
+  <rect x="16" y="78" width="868" height="72" rx="8"/>
+  <text class="th" x="450" y="97" text-anchor="middle">
+    LangGraph StateGraph · Supervisor Pattern
+  </text>
+  <text class="ts" x="450" y="113" text-anchor="middle">
+    SqliteSaver checkpointing · max_rounds iterative refinement loop
+  </text>
+  <text x="450" y="130" text-anchor="middle"
+        font-family="'SFMono-Regular',Consolas,monospace" font-size="9" fill="#5e35b1">
+    route(): !fetched→reader | fixes=[]→remediator | result=None→validator | remaining&lt;N→remediator↩ | else→github
+  </text>
+  <!-- checkpoint label near right -->
+  <text x="798" y="147" font-size="8" fill="#9575cd">↕ checkpoint</text>
+</g>
+
+<!-- Fan arrows: Supervisor bottom (y=150) → 4 Agent tops (y=174) -->
+<!-- A1 center x = 16 + 94  = 110 -->
+<!-- A2 center x = 240 + 94 = 334 -->
+<!-- A3 center x = 464 + 94 = 558 -->
+<!-- A4 center x = 688 + 96 = 784 -->
+<line x1="110" y1="150" x2="110" y2="173" stroke="#546e7a" stroke-width="0.9" marker-end="url(#ar)"/>
+<line x1="334" y1="150" x2="334" y2="173" stroke="#546e7a" stroke-width="0.9" marker-end="url(#ar)"/>
+<line x1="558" y1="150" x2="558" y2="173" stroke="#546e7a" stroke-width="0.9" marker-end="url(#ar)"/>
+<line x1="784" y1="150" x2="784" y2="173" stroke="#546e7a" stroke-width="0.9" marker-end="url(#ar)"/>
+
+<!-- ══════════════════════════════════════════
+     ROW 2 — 4 AGENT BOXES   (y=175 ~ y=279)
+     gaps = 36px between each box
+     A1: x=16 w=188   A2: x=240 w=188   A3: x=464 w=188   A4: x=688 w=196
+     ══════════════════════════════════════════ -->
+
+<!-- A1: IssueReader -->
+<g class="node c-teal" onclick="show('reader')">
+  <rect x="16" y="175" width="188" height="104" rx="8"/>
+  <text x="22" y="194" class="th-sm">① IssueReader</text>
+  <line x1="22" y1="200" x2="196" y2="200" stroke="#b2dfdb" stroke-width="0.5"/>
+  <text x="22" y="214" class="ts-sm">Tool Use · REST API</text>
+  <text x="22" y="227" class="ts-sm">Structured output</text>
+  <text x="22" y="240" class="ts-sm">emit Issue[] → state</text>
+  <text x="22" y="270" class="tag-lbl" fill="#4db6ac">Tool Use · API</text>
+</g>
+
+<!-- Sequential arrow A1 → A2 -->
+<line x1="204" y1="227" x2="240" y2="227"
+      stroke="#546e7a" stroke-width="1.3" marker-end="url(#ar)"/>
+
+<!-- A2: Remediator -->
+<g class="node c-teal" onclick="show('remediator')">
+  <rect x="240" y="175" width="188" height="104" rx="8"/>
+  <text x="246" y="194" class="th-sm">② Remediator</text>
+  <line x1="246" y1="200" x2="420" y2="200" stroke="#b2dfdb" stroke-width="0.5"/>
+  <text x="246" y="214" class="ts-sm">RAG · embed → top-k</text>
+  <text x="246" y="227" class="ts-sm">Prompt Engineering</text>
+  <text x="246" y="240" class="ts-sm">LLM → emit Fix[] → state</text>
+  <text x="246" y="270" class="tag-lbl" fill="#4db6ac">RAG · LLM Generation</text>
+</g>
+
+<!-- Sequential arrow A2 → A3 -->
+<line x1="428" y1="227" x2="464" y2="227"
+      stroke="#546e7a" stroke-width="1.3" marker-end="url(#ar)"/>
+
+<!-- A3: Validator -->
+<g class="node c-teal" onclick="show('validator')">
+  <rect x="464" y="175" width="188" height="104" rx="8"/>
+  <text x="470" y="194" class="th-sm">③ Validator</text>
+  <line x1="470" y1="200" x2="644" y2="200" stroke="#b2dfdb" stroke-width="0.5"/>
+  <text x="470" y="214" class="ts-sm">Apply patch · Tool Use</text>
+  <text x="470" y="227" class="ts-sm">External verify · poll</text>
+  <text x="470" y="240" class="ts-sm">emit ValidationResult</text>
+  <text x="470" y="270" class="tag-lbl" fill="#4db6ac">Tool Use · Feedback</text>
+</g>
+
+<!-- Sequential arrow A3 → A4 -->
+<line x1="652" y1="227" x2="688" y2="227"
+      stroke="#546e7a" stroke-width="1.3" marker-end="url(#ar)"/>
+
+<!-- A4: GitHub -->
+<g class="node c-teal" onclick="show('github')">
+  <rect x="688" y="175" width="196" height="104" rx="8"/>
+  <text x="694" y="194" class="th-sm">④ GitHub Agent</text>
+  <line x1="694" y1="200" x2="876" y2="200" stroke="#b2dfdb" stroke-width="0.5"/>
+  <text x="694" y="214" class="ts-sm">Tool Use · Git ops</text>
+  <text x="694" y="227" class="ts-sm">Create branch · commit</text>
+  <text x="694" y="240" class="ts-sm">Open PR · emit pr_url</text>
+  <text x="694" y="270" class="tag-lbl" fill="#4db6ac">Tool Use · External API</text>
+</g>
+
+<!-- ══════════════════════════════════════════
+     RETRY LOOP: Validator → Remediator
+     Goes: right side of A3 → far right → y=160 → back to A2 top
+     ══════════════════════════════════════════ -->
+<path d="M652,227 L891,227 L891,160 L240,160 L240,177"
+      fill="none" stroke="#ef9a9a" stroke-width="1.2"
+      stroke-dasharray="5 3" marker-end="url(#ar-red)"/>
+<text x="780" y="222" font-size="8" fill="#ef9a9a">remaining &gt; 0</text>
+<text x="780" y="232" font-size="8" fill="#ef9a9a">&amp;&amp; round &lt; N</text>
+<text x="780" y="244" font-size="8" fill="#ef9a9a" font-weight="600">↩ retry</text>
+
+<!-- ══════════════════════════════════════════
+     STATE FLOW LABEL
+     ══════════════════════════════════════════ -->
+<text x="450" y="294" text-anchor="middle" font-size="8.5" fill="#b0bec5" font-style="italic">
+  AgentState (TypedDict) · issues[] → fixes[] → validation_result → pr_url · auto-persisted at each node
+</text>
+
+<!-- ══════════════════════════════════════════
+     ROW 3 — INFRASTRUCTURE  (y=302 ~ y=384)
+     RAG x=16 w=255   LiteLLM x=287 w=255   SQLite x=558 w=326
+     ══════════════════════════════════════════ -->
+
+<!-- RAG -->
+<g class="node c-green" onclick="show('rag')">
+  <rect x="16" y="302" width="255" height="82" rx="8"/>
+  <text class="th-sm" x="143" y="319" text-anchor="middle">🗄 pgvector RAG</text>
+  <line x1="26" y1="325" x2="263" y2="325" stroke="#c8e6c9" stroke-width="0.5"/>
+  <text x="26" y="339" class="ts-sm">PostgreSQL + pgvector</text>
+  <text x="26" y="352" class="ts-sm">600+ 规则向量索引</text>
+  <text x="26" y="365" class="ts-sm">cosine similarity Top-K</text>
+  <text x="26" y="378" class="tag-lbl" fill="#43a047">Embeddings · cosine similarity</text>
+</g>
+
+<!-- LiteLLM -->
+<g class="node c-purple" onclick="show('litellm')">
+  <rect x="287" y="302" width="255" height="82" rx="8"/>
+  <text class="th-sm" x="414" y="319" text-anchor="middle">🤖 LiteLLM 模型抽象</text>
+  <line x1="297" y1="325" x2="534" y2="325" stroke="#d1c4e9" stroke-width="0.5"/>
+  <text x="297" y="339" class="ts-sm">统一接口热切换 Provider</text>
+  <text x="297" y="352" class="ts-sm">Claude Sonnet · Azure GPT-4o</text>
+  <text x="297" y="365" class="ts-sm">LLM_MODEL env var 切换</text>
+  <text x="297" y="378" class="tag-lbl" fill="#7e57c2">Provider Abstraction</text>
+</g>
+
+<!-- SQLite -->
+<g class="node c-amber" onclick="show('sqlite')">
+  <rect x="558" y="302" width="326" height="82" rx="8"/>
+  <text class="th-sm" x="721" y="319" text-anchor="middle">💾 SQLite · LangGraph Checkpoint</text>
+  <line x1="568" y1="325" x2="876" y2="325" stroke="#ffe0b2" stroke-width="0.5"/>
+  <text x="568" y="339" class="ts-sm">SqliteSaver 每节点全量持久化</text>
+  <text x="568" y="352" class="ts-sm">--thread-id 任意中断恢复</text>
+  <text x="568" y="365" class="ts-sm">Fault-tolerant Execution</text>
+  <text x="568" y="378" class="tag-lbl" fill="#fb8c00">Fault-tolerant · Resumable</text>
+</g>
+
+<!-- Infra connection arrows (thin dashed) -->
+<!-- A2 (Remediator center=334) → RAG (center=143) -->
+<line x1="310" y1="279" x2="143" y2="302"
+      stroke="#90a4ae" stroke-width="0.9" stroke-dasharray="3 2" marker-end="url(#ar-thin)"/>
+<!-- A2 (Remediator center=334) → LiteLLM (center=414) -->
+<line x1="360" y1="279" x2="414" y2="302"
+      stroke="#90a4ae" stroke-width="0.9" stroke-dasharray="3 2" marker-end="url(#ar-thin)"/>
+<!-- Supervisor right → SQLite (checkpoint, amber dashed) -->
+<line x1="852" y1="150" x2="760" y2="302"
+      stroke="#ffb74d" stroke-width="0.9" stroke-dasharray="3 2" marker-end="url(#ar-amber)"/>
+
+<!-- ══════════════════════════════════════════
+     ROW 4 — EXTERNAL SERVICES  (y=400 ~ y=472)
+     SonarQube x=16 w=412   GitHub x=444 w=440
+     ══════════════════════════════════════════ -->
+
+<!-- SonarQube -->
+<g class="node" style="fill:#fff8f1;stroke:#ffa726;stroke-dasharray:5 3"
+   onclick="show('sonar')">
+  <rect x="16" y="400" width="412" height="72" rx="8"/>
+  <text x="22" y="418" class="th-sm">
+    🔎 SonarQube
+    <tspan font-size="9" fill="#8d6e63" font-weight="400"> (on-premise · Self-hosted)</tspan>
+  </text>
+  <line x1="22" y1="424" x2="420" y2="424" stroke="#ffe0b2" stroke-width="0.5"/>
+  <text x="22" y="438" class="ts-sm">问题检测 · 规则库 · 重扫验证</text>
+  <text x="22" y="451" class="ts-sm">REST API · sonar-scanner CLI</text>
+  <text x="22" y="466" class="tag-lbl" fill="#ffa726">IssueReader (read) · Validator (verify)</text>
+</g>
+
+<!-- GitHub -->
+<g class="node" style="fill:#f1f5f9;stroke:#90a4ae;stroke-dasharray:5 3"
+   onclick="show('gh')">
+  <rect x="444" y="400" width="440" height="72" rx="8"/>
+  <text x="450" y="418" class="th-sm">
+    🐙 GitHub
+    <tspan font-size="9" fill="#78909c" font-weight="400"> (target repository)</tspan>
+  </text>
+  <line x1="450" y1="424" x2="876" y2="424" stroke="#e0e0e0" stroke-width="0.5"/>
+  <text x="450" y="438" class="ts-sm">分支创建 · 代码提交 · Pull Request</text>
+  <text x="450" y="451" class="ts-sm">GitHub REST API v3 · PyGitHub</text>
+  <text x="450" y="466" class="tag-lbl" fill="#78909c">GitHub Agent (publish)</text>
+</g>
+
+<!-- Arrows: agents → external services -->
+<!-- A1 → SonarQube -->
+<line x1="110" y1="279" x2="160" y2="400"
+      stroke="#90a4ae" stroke-width="0.9" marker-end="url(#ar-thin)"/>
+<!-- A3 → SonarQube -->
+<line x1="540" y1="279" x2="365" y2="400"
+      stroke="#90a4ae" stroke-width="0.9" marker-end="url(#ar-thin)"/>
+<!-- A4 → GitHub -->
+<line x1="784" y1="279" x2="680" y2="400"
+      stroke="#90a4ae" stroke-width="0.9" marker-end="url(#ar-thin)"/>
+
+</svg>
+
+<!-- ══════════════════════════════════════════
+     CLICK-TO-REVEAL DETAIL PANEL
+     ══════════════════════════════════════════ -->
+<div class="info-box" id="info-box">
+  <div class="info-title">SonarFix AI — LangGraph Supervisor + RAG + Tool Use Architecture</div>
+  <div class="info-body">Four-layer graph architecture: CLI → LangGraph Supervisor (conditional state-machine routing) → 4 Agent nodes (sequential flow with iterative retry) → Infrastructure (RAG·pgvector, LiteLLM, SQLite checkpoint) → External services (SonarQube on-premise, GitHub).
+Click any component to view implementation details.</div>
+</div>
+</div>
+
+<script>
+const D = {
+  cli: {
+    t: 'CLI Trigger — Entry Point',
+    b: 'Two commands:\n• run  — start a new task: --project (SonarQube key), --branch, --github-repo, --max-rounds\n• resume — continue interrupted task: --thread-id <uuid>\n\nCreates a UUID thread_id on start, initializes AgentState, and writes it to SQLite. The thread_id printed on screen lets users resume after any interruption.',
+    tags: ['Python CLI', 'argparse', 'UUID thread_id', 'Fault-tolerant']
+  },
+  supervisor: {
+    t: 'LangGraph StateGraph · Supervisor Pattern — Orchestration Core',
+    b: 'Conditional state machine implemented with LangGraph StateGraph. A single route() function reads AgentState fields and decides the next node:\n\n  issues=[] & !fetched  →  IssueReader   (fetch issues)\n  issues=[] &  fetched  →  END            (nothing to fix)\n  fixes=[]              →  Remediator     (generate patch)\n  validation=None       →  Validator      (verify patch)\n  remaining & round<N  →  Remediator     (retry loop)\n  else                  →  GitHub Agent   (publish PR)\n\nSqliteSaver serializes full AgentState after every node transition. --thread-id resumes from the last checkpoint.',
+    tags: ['LangGraph', 'StateGraph', 'Supervisor Pattern', 'State Machine', 'SqliteSaver', 'Conditional Routing']
+  },
+  reader: {
+    t: 'IssueReader Agent — Tool Use · Data Fetch',
+    b: 'Fetches all unresolved Java issues from SonarQube REST API using Tool Use pattern.\n\nKey calls: GET /api/issues/search · GET /api/rules/show · GET /api/sources/lines\n\nOutputs structured Issue[] objects into AgentState. Each Issue includes: rule_id, message, severity, component path, line number, source context.',
+    tags: ['Tool Use', 'REST API', 'Structured Output', 'SonarQube']
+  },
+  remediator: {
+    t: 'Remediation Agent — RAG + Prompt Engineering + LLM Generation',
+    b: 'Core intelligence. For each issue:\n\n1. RAG retrieval: embed (rule_id + rule_description) → pgvector cosine similarity → Top-K rule docs\n2. Prompt Engineering: inject rule docs + source context → structured LLM prompt\n3. LLM generation: LiteLLM → unified diff patch\n4. Emit Fix[] → AgentState via append reducer (Annotated[List[Fix], operator.add])\n\nOn retry rounds, previous fix attempts are also available in state as context.',
+    tags: ['RAG', 'pgvector', 'LiteLLM', 'Prompt Engineering', 'LLM Generation', 'unified diff', 'Reducer']
+  },
+  validator: {
+    t: 'Validation Agent — Tool Use · Iterative Feedback',
+    b: 'Applies generated patches and verifies results:\n\n1. Apply unified diffs to local repo\n2. Trigger sonar-scanner CLI re-scan\n3. Poll /api/ce/task until scan completes\n4. Compare new issue list → emit ValidationResult\n\nIf remaining_issues > 0 && round < max_rounds, the Supervisor routes back to Remediator. This creates a closed iterative refinement loop.',
+    tags: ['Tool Use', 'sonar-scanner CLI', 'API Polling', 'Iterative Refinement', 'State Update', 'Feedback Loop']
+  },
+  github: {
+    t: 'GitHub Agent — Tool Use · Output & Publish',
+    b: 'Publishes the fix as a pull request:\n\n1. Create feature branch: fix/sonar-<timestamp>\n2. git add + commit (patched files)\n3. POST /repos/{owner}/{repo}/pulls → open PR\n4. Emit pr_url → AgentState (complete audit trail)\n\nRequires GitHub token with repo scope. GITHUB_REPO env var sets target as "org/repo".',
+    tags: ['Tool Use', 'PyGitHub', 'GitHub REST API v3', 'Feature Branch', 'PR Automation']
+  },
+  rag: {
+    t: 'pgvector RAG — Vector Knowledge Retrieval',
+    b: 'Vector database for SonarQube Java rule knowledge.\n\nSchema: rules table with 600+ entries + vector column (pgvector)\nEmbedding: OpenAI text-embedding-3-small (1536d) or local all-MiniLM-L6-v2 (384d)\nRetrieval: cosine similarity search → Top-K most relevant rule docs injected into LLM prompt\n\nOne-time setup:\n  python -m rag.ingest --sonar-url http://... --token ...\nRuns in ~2–5 min, indexes all Java rules, no repeat needed unless rules update.',
+    tags: ['pgvector', 'PostgreSQL', 'Cosine Similarity', 'text-embedding-3-small', 'all-MiniLM-L6-v2', 'RAG']
+  },
+  litellm: {
+    t: 'LiteLLM · Model Abstraction Layer',
+    b: 'Single unified interface for multiple LLM providers — switch without changing code.\n\n  LLM_MODEL=claude-sonnet-4-6   → Anthropic\n  LLM_MODEL=azure/gpt-4o        → Azure OpenAI\n\nThe Remediation Agent always calls litellm.completion(). Provider routing is pure configuration.\n\nThis pattern is standard in production AI systems for cost optimization and provider failover.',
+    tags: ['LiteLLM', 'Provider Abstraction', 'Claude Sonnet', 'Azure GPT-4o', 'Hot-swap', 'Env Config']
+  },
+  sqlite: {
+    t: 'SQLite · LangGraph Checkpoint — Fault Tolerance',
+    b: 'LangGraph SqliteSaver serializes the complete AgentState to SQLite (runs/agent_runs.db) after every node transition.\n\nResume an interrupted run:\n  python main.py resume --thread-id a1b2c3d4-...\n\nLangGraph loads the last checkpoint and continues from the next node — already-completed nodes are skipped. Process crashes, network errors, or manual stops are all recoverable.',
+    tags: ['SqliteSaver', 'Checkpointing', 'Fault-tolerant', 'Resumable', 'thread_id', 'LangGraph']
+  },
+  sonar: {
+    t: 'SonarQube (on-premise) — Code Analysis Platform',
+    b: 'Self-hosted SonarQube instance. Reason this project exists: the official SonarQube Remediation Agent feature is cloud-only (SonarQube Cloud). This agent replicates that capability for on-premise deployments.\n\nUsed by two agents:\n• IssueReader  — reads open issues, rule metadata, source context\n• Validator    — triggers re-scan, polls task status, verifies resolution\n\nKey APIs: /api/issues/search · /api/rules/show · /api/sources/lines · /api/ce/task',
+    tags: ['SonarQube', 'on-premise', 'Self-hosted', 'REST API', 'sonar-scanner CLI', 'Java']
+  },
+  gh: {
+    t: 'GitHub — Target Repository',
+    b: 'The repository containing the Java code being fixed.\n\nOperations by GitHub Agent:\n• git checkout -b fix/sonar-<timestamp>\n• git add · git commit  (patched files)\n• POST /repos/{owner}/{repo}/pulls  (open PR)\n\nThe PR URL is written to AgentState, forming a complete audit trail from issue detection to code review.',
+    tags: ['PyGitHub', 'GitHub REST API v3', 'Feature Branch', 'Pull Request', 'Audit Trail']
+  }
+};
+
+function show(key) {
+  const d = D[key];
+  if (!d) return;
+  const tags = d.tags.map(t => `<span class="tag">${t}</span>`).join('');
+  document.getElementById('info-box').innerHTML =
+    `<div class="info-title">${d.t}</div>`
+    + `<div class="info-body">${d.b}</div>`
+    + `<div style="margin-top:9px">${tags}</div>`;
+}
+</script>
+</html>
