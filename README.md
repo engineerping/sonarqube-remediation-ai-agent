@@ -302,6 +302,3 @@ docker compose down
 docker compose down -v
 ```
 
----
-
-> 英文文档请参阅 [README_EN.md](README_EN.md)

@@ -302,6 +302,3 @@ docker compose down
 docker compose down -v
 ```
 
----
-
-> Chinese documentation: [README.md](README.md)
